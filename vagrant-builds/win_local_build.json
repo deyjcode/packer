@@ -1,0 +1,70 @@
+{
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "iso_url": "{{ user `iso_url` }}",
+      "iso_checksum": "{{ user `iso_checksum` }}",
+      "iso_checksum_type": "{{ user `iso_checksum_type` }}",
+      "headless": true,
+      "boot_wait": "2m",
+      "communicator": "winrm",
+      "winrm_username": "vagrant",
+      "winrm_password": "vagrant",
+      "shutdown_command": "C:\\Windows\\system32\\sysprep\\sysprep.exe /unattend:A:\\shutdown.xml /quiet /generalize /oobe /shutdown",
+      "shutdown_timeout": "15m",
+      "guest_os_type": "{{ user `guest_os_type` }}",
+      "disk_size": 61440,
+      "floppy_files": [
+        "{{ user `floppyfile1` }}",
+        "{{ user `floppyfile2` }}"
+      ],
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "4096"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "2"
+        ]
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "powershell",
+      "scripts":  [
+        "./scripts/virtualbox-additions.ps1",
+        "./scripts/bootstrap.ps1",
+        "./scripts/zero.ps1"
+      ]
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "type": "vagrant",
+        "compression_level": 9,
+        "keep_input_artifact": false,
+        "output": "{{ user `name` }}-{{ user `guest_os_version` }}-{{.Provider}}.box",
+        "vagrantfile_template": "{{ user `template` }}.template"
+      }
+    ]
+  ],
+  "variables": {
+    "name": "",
+    "box_tag": "",
+    "template": "",
+    "iso_url": "",
+    "iso_checksum": "",
+    "iso_checksum_type": "",
+    "floppyfile1": "",
+    "floppyfile2": "",
+    "guest_os_type": "",
+    "guest_os_version": ""
+  }
+}
